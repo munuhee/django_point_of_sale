@@ -127,8 +127,8 @@
 <!--Datatables-->
 <script>
     // Call the dataTables jQuery plugin
-    $(document).ready(function() {
-        tblCategories = $('#dataTable').DataTable({
+    Ksh(document).ready(function() {
+        tblCategories = Ksh('#dataTable').DataTable({
             dom: 'Bfrtip', // Buttons are draw at this element
             buttons: [
                 {
@@ -224,12 +224,12 @@
     });
 
     // Alert when trying to delete a category
-    $('#dataTable tbody')
+    Ksh('#dataTable tbody')
     // Event when whe try to delete a category
     // We update the text, and href of the modal delete button
     .on('click', 'button[rel="delete"]', function () {
     // Row variable
-    var tr = tblCategories.cell($(this).closest('td, li')).index();
+    var tr = tblCategories.cell(Ksh(this).closest('td, li')).index();
     row_data = ( tblCategories.row(tr.row).data());
     category_id = row_data[0];
     category_name = row_data[2]
