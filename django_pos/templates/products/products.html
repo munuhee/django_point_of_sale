@@ -56,7 +56,15 @@
                             <td>{{p.description}}</td>
                             <td>{{p.category}}</td>
                             <td class="text-right">{{p.price}} Ksh</td>
-                            <td class="text-right">{{p.quantity}}</td>
+                            <td class="text-right">
+                                {% if p.quantity == 0 %}
+                                    <span class="badge badge-danger">({{ p.quantity }}) Out of Stock</span>
+                                {% elif p.quantity < 5 %}
+                                    <span class="badge badge-warning">({{ p.quantity }}) Low</span>
+                                {% else %}
+                                    {{ p.quantity }}
+                                {% endif %}
+                            </td>
                             {% if p.status == "ACTIVE" %}
                             <td class="text-center">
                                 <span class="badge badge-success" style="font-size:0.8em;">{{p.status}}</span>
