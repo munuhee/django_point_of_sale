@@ -39,9 +39,10 @@
                             <th>ID</th>
                             <th style="width:5%">#</th>
                             <th style="width:20%">Name</th>
-                            <th style="width:25%">Description</th>
-                            <th style="width:15%">Category</th>
+                            <th style="width:20%">Description</th>
+                            <th style="width:10%">Category</th>
                             <th class="text-center" style="width:15%">Price</th>
+                            <th class="text-center" style="width:10%">Quantity</th>
                             <th class="text-center" style="width:10%">Status</th>
                             <th class="text-center" style="width:10%">Actions</th>
                         </tr>
@@ -55,6 +56,7 @@
                             <td>{{p.description}}</td>
                             <td>{{p.category}}</td>
                             <td class="text-right">{{p.price}} Ksh</td>
+                            <td class="text-right">{{p.quantity}}</td>
                             {% if p.status == "ACTIVE" %}
                             <td class="text-center">
                                 <span class="badge badge-success" style="font-size:0.8em;">{{p.status}}</span>

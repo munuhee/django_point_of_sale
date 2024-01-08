@@ -160,7 +160,8 @@ def ProductsAddView(request):
             "status": data['state'],
             "description": data['description'],
             "category": Category.objects.get(id=data['category']),
-            "price": data['price']
+            "price": data['price'],
+            "quantity": data['quantity']
         }
 
         # Check if a product with the same attributes exists
@@ -222,7 +223,8 @@ def ProductsUpdateView(request, product_id):
                 "status": data['state'],
                 "description": data['description'],
                 "category": Category.objects.get(id=data['category']),
-                "price": data['price']
+                "price": data['price'],
+                "quantity": data['quantity']
             }
 
             # Check if a product with the same attributes exists
