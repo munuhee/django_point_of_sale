@@ -165,7 +165,7 @@ def ProductsAddView(request):
         }
 
         # Check if a product with the same attributes exists
-        if Product.objects.filter(**attributes).exists():
+        if Product.objects.filter(**attributes).exclude(id=product_id).exists():
             messages.error(request, 'Product already exists!',
                            extra_tags="warning")
             return redirect('products:products_add')
@@ -228,7 +228,7 @@ def ProductsUpdateView(request, product_id):
             }
 
             # Check if a product with the same attributes exists
-            if product.objects.filter(**attributes).exists():
+            if Product.objects.filter(**attributes).exclude(id=product_id).exists():
                 messages.error(request, 'Product already exists!',
                                extra_tags="warning")
                 return redirect('products:products_add')
