@@ -54,6 +54,19 @@ def SalesAddView(request):
                 products = data["products"]
 
                 for product in products:
+                    product_id = int(product["id"])
+                    quantity = int(product["quantity"])
+                    product_instance = Product.objects.get(id=product_id)
+
+                    if product_instance.quantity < quantity:
+                        messages.error(
+                            request, f'Insufficient quantity for product: {product_instance.name}', extra_tags="danger")
+                        new_sale.delete()
+                        return redirect('sales:sales_list')
+
+                    product_instance.quantity -= quantity
+                    product_instance.save()
+
                     detail_attributes = {
                         "sale": Sale.objects.get(id=new_sale.id),
                         "product": Product.objects.get(id=int(product["id"])),
