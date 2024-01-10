@@ -238,7 +238,7 @@
                         class: 'text-right',
                         targets: [2,4],
                         render: function (data, type, row){
-                            return parseFloat(data).toFixed(2) + ' $';
+                            return parseFloat(data).toFixed(2) + ' Ksh';
                         },
                     },
                     {
@@ -345,7 +345,7 @@
                 // Calculate the sale with the new quantity
                 sale.calculate_sale();
                 // Find the row to update the product total
-                $('td:eq(4)', tblProducts.row(tr.row).node()).html(sale.items.products[tr.row].total_product + ' $');
+                $('td:eq(4)', tblProducts.row(tr.row).node()).html(sale.items.products[tr.row].total_product + ' Ksh');
         });
 
         // Delete all products
