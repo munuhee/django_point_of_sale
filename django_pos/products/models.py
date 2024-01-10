@@ -39,7 +39,11 @@ class Product(models.Model):
         verbose_name="Status of the product",
     )
     category = models.ForeignKey(
-        Category, related_name="category", on_delete=models.SET_NULL, null=True, blank=True, db_column='category'
+        Category,
+        related_name="products",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
     )
     price = models.FloatField(default=0)
     quantity = models.IntegerField(default=0)
