@@ -196,8 +196,8 @@
 
             //Update the sale subtotal, grand total, and tax amount
             this.items.sub_total = roundTo(sub_total, 2);
-            this.items.grand_total = roundTo(this.items.sub_total, 2);
             this.items.tax_amount = roundTo(this.items.sub_total * (tax_percentage / 100), 2);
+            this.items.grand_total = roundTo(this.items.sub_total + this.items.tax_amount, 2);
     
             $('input[name="sub_total"]').val(this.items.sub_total);
             $('input[name="tax_amount"]').val(this.items.tax_amount);
@@ -284,6 +284,27 @@
             maxboostedstep: 10,
             postfix: '%'
         }).on('change', function(){
+         // Update tax amount based on tax percentage
+            var taxPercentage = parseFloat($(this).val());
+            var subTotal = parseFloat($('input[name="sub_total"]').val());
+
+            var taxAmount = (taxPercentage / 100) * subTotal;
+            $('input[name="tax_amount"]').val(taxAmount.toFixed(2));
+
+            // Recalculate grand total
+            sale.calculate_sale();
+        });
+
+        // Tax amount input field
+        $("input[name='tax_amount']").on('change', function(){
+            // Update tax percentage based on tax amount
+            var taxAmount = parseFloat($(this).val());
+            var subTotal = parseFloat($('input[name="sub_total"]').val());
+
+            var taxPercentage = (taxAmount / subTotal) * 100;
+            $('input[name="tax_percentage"]').val(taxPercentage.toFixed(2));
+
+            // Recalculate grand total
             sale.calculate_sale();
         });
 
@@ -484,7 +505,7 @@
             };
             
             // Only allow to send if the payed amount is equal or greater than the total
-            if ($('[name="amount_payed"]').val() <= $('[name="grand_total"]').val()) {
+            if ($('[name="amount_payed"]').val() < $('[name="grand_total"]').val()) {
                 Swal.fire({
                     title: 'Payable Amount is lower that the Grand Total',
                     icon: 'warning',
@@ -492,7 +513,7 @@
                 return false;
             }
 
-            // Agregamos los datos faltantes al objeto sales
+            // We add the missing data to the sales object
             sale.items.customer = $('select[name="customer"]').val();
             console.log("Customer: " + sale.items.customer)
             sale.items.sub_total = $('input[name="sub_total"]').val(); 
