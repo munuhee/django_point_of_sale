@@ -6,6 +6,7 @@ from django_pos.wsgi import *
 from django_pos import settings
 from django.template.loader import get_template
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db.models import Q
 from customers.models import Customer
 from products.models import Product
 from weasyprint import HTML, CSS
@@ -16,14 +17,25 @@ import json
 def is_ajax(request):
     return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
 
-
 @login_required(login_url="/accounts/login/")
 def SalesListView(request):
     # Specify the number of items per page
     items_per_page = 10  # You can adjust this as needed
 
-    # Retrieve all sales records and order by date_added
-    all_sales = Sale.objects.all().order_by('-date_added')
+    # Get the search query from the GET parameters
+    search_query = request.GET.get('search', '')
+
+    # Retrieve sales records based on search query and order by date_added
+    all_sales = Sale.objects.filter(
+        Q(customer__first_name__icontains=search_query) |
+        Q(customer__last_name__icontains=search_query) |
+        Q(sub_total__icontains=search_query) |
+        Q(grand_total__icontains=search_query) |
+        Q(tax_amount__icontains=search_query) |
+        Q(tax_percentage__icontains=search_query) |
+        Q(amount_payed__icontains=search_query) |
+        Q(amount_change__icontains=search_query)
+    ).order_by('-date_added')
 
     # Use Django Paginator to paginate the results
     paginator = Paginator(all_sales, items_per_page)
@@ -35,12 +47,13 @@ def SalesListView(request):
         # If page is not an integer, deliver first page.
         sales = paginator.page(1)
     except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
+        # If page is out of range (e.g., 9999), deliver last page of results.
         sales = paginator.page(paginator.num_pages)
 
     context = {
         "active_icon": "sales",
         "sales": sales,
+        "search_query": search_query,
     }
     return render(request, "sales/sales.html", context=context)
 
