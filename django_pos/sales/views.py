@@ -5,6 +5,7 @@ from django.shortcuts import render, redirect
 from django_pos.wsgi import *
 from django_pos import settings
 from django.template.loader import get_template
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from customers.models import Customer
 from products.models import Product
 from weasyprint import HTML, CSS
@@ -18,9 +19,28 @@ def is_ajax(request):
 
 @login_required(login_url="/accounts/login/")
 def SalesListView(request):
+    # Specify the number of items per page
+    items_per_page = 10  # You can adjust this as needed
+
+    # Retrieve all sales records and order by date_added
+    all_sales = Sale.objects.all().order_by('-date_added')
+
+    # Use Django Paginator to paginate the results
+    paginator = Paginator(all_sales, items_per_page)
+    page = request.GET.get('page')
+
+    try:
+        sales = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        sales = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        sales = paginator.page(paginator.num_pages)
+
     context = {
         "active_icon": "sales",
-        "sales": Sale.objects.all().order_by('-date_added')
+        "sales": sales,
     }
     return render(request, "sales/sales.html", context=context)
 

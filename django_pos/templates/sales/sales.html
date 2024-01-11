@@ -72,6 +72,38 @@
                         {% endfor %}
                     </tbody>
                 </table>
+                <!-- Add pagination links at the bottom of the table -->
+                <div class="row">
+                    <div class="col-md-12">
+                        <nav aria-label="Page navigation example">
+                            <ul class="pagination justify-content-end">
+                                {% if sales.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=1" tabindex="-1">First</a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ sales.previous_page_number }}">Previous</a>
+                                    </li>
+                                {% endif %}
+
+                                {% for i in sales.paginator.page_range %}
+                                    <li class="page-item{% if i == sales.number %} active{% endif %}">
+                                        <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                                    </li>
+                                {% endfor %}
+
+                                {% if sales.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ sales.next_page_number }}">Next</a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ sales.paginator.num_pages }}">Last</a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
