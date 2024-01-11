@@ -20,7 +20,7 @@ def is_ajax(request):
 def SalesListView(request):
     context = {
         "active_icon": "sales",
-        "sales": Sale.objects.all()
+        "sales": Sale.objects.all().order_by('-date_added')
     }
     return render(request, "sales/sales.html", context=context)
 
