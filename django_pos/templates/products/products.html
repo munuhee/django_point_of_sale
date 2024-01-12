@@ -32,6 +32,12 @@
             <h6 class="m-0 font-weight-bold text-primary">Products</h6>
         </div>
         <div class="card-body">
+            <!-- Display "No results found" if there are no sales -->
+        {% if products|length == 0 %}
+        <div class="alert alert-warning" role="alert">
+            No results found.
+        </div>
+        {% endif %}
             <!-- Add a search form above the table -->
             <form method="get" action="{% url 'products:products_list' %}">
                 <div class="input-group mb-3">
