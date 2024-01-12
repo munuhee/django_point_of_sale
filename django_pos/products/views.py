@@ -1,6 +1,8 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db.models import Q
 from django.shortcuts import render, redirect
 from .models import Category, Product
 
@@ -136,12 +138,37 @@ def CategoriesDeleteView(request, category_id):
 
 @login_required(login_url="/accounts/login/")
 def ProductsListView(request):
+    products_list = Product.objects.all()
+
+    # Search functionality
+    search_query = request.GET.get('search', '')
+    if search_query:
+        products_list = products_list.filter(
+            Q(name__icontains=search_query) |
+            Q(description__icontains=search_query) |
+            Q(category__name__icontains=search_query)
+        )
+
+    # Pagination
+    paginator = Paginator(products_list, 10)
+    # Get the current page number from the request, defaulting to 1
+    page = request.GET.get('page', 1)
+
+    try:
+        products = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        products = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        products = paginator.page(paginator.num_pages)
+
     context = {
         "active_icon": "products",
-        "products": Product.objects.all()
+        "products": products,
+        "search_query": search_query,
     }
     return render(request, "products/products.html", context=context)
-
 
 @login_required(login_url="/accounts/login/")
 def ProductsAddView(request):
