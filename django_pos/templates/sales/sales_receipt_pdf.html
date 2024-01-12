@@ -5,112 +5,153 @@
     <meta charset="UTF-8">
     <title>Sale Receipt PDF</title>
     <style>
-
-        * {
-            color: black;
-        }
-
         body {
             font-family: "Roboto", "Lucida Grande", Verdana, Arial, sans-serif;
-            padding: 0;
             margin: 0;
+            padding: 0;
             color: black;
+            background-color: #f4f4f4;
         }
 
-        .name-company {
-            font-size: 25px;
-            <!--
-                padding: 0;
-                margin: 0;
-            -->
-            font-weight: bold;
-            text-transform: uppercase;
-            <!--
-            text-align: center;
-            -->
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            overflow: hidden;
         }
 
-        table thead tr th {
-            border: 1px solid black !important;
-            padding: 3px;
+        .row {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+            border-bottom: 1px solid #ccc;
         }
 
-        table tbody tr td {
-            border: 1px solid black;
-            padding: 3px;
+        .col {
+            flex: 0 0 48%;
         }
 
-        .img-logo {
-            margin-top: 10px;
+        .logo {
             width: 75px;
             height: 75px;
             margin-bottom: 10px;
         }
 
+        .company-info p {
+            margin: 0;
+        }
+
+        .company-name {
+            font-size: 25px;
+            font-weight: bold;
+            text-transform: uppercase;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .sale-info p {
+            margin: 0;
+        }
+
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: #fff;
+        }
+
+        .details-table th,
+        .details-table td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .font-weight-bold {
+            font-weight: bold;
+        }
+
+        .thanks-message {
+            margin: 20px;
+            text-align: center;
+            color: #555;
+        }
     </style>
 </head>
 <body>
-<div class="container-fluid">
-    <div class="row border border-dark">
-        <div class="col-6">
-            <p class="name-company"><b>SHOP</b></p>
-            <p><b>135 East 57th Street</b></p>
-            <p><b>Ngong, KE 10011, Kenya</b></p>
-            <p><b>Phone:</b> +254 706 679388</p>
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <img src="{% static 'your-logo.png' %}" alt="Aurum Wholesalers and Retailers" class="logo">
+            <div class="company-info">
+                <p>135 East 57th Street</p>
+                <p>Ngong, KE 10011, Kenya</p>
+                <p>Phone: +254 706 679388</p>
+            </div>
         </div>
-        <div class="col-6 border-left border-dark">
-            <p><b>Date:</b> {{sale.date_added}}</p>
-            <p><b>Sale ID:</b> {{sale.id}}</p>
-            <p><b>Customer:</b> {{sale.customer.get_full_name}}</p>
+        <div class="col">
+            <div class="sale-info">
+                <p><b>Date:</b> {{sale.date_added}}</p>
+                <p><b>Sale ID:</b> {{sale.id}}</p>
+                <p><b>Customer:</b> {{sale.customer.get_full_name}}</p>
+            </div>
         </div>
     </div>
 
-    <br>
-
-    <!--Tabla de productos-->
-    <table class="table" style="width: 100%;">
+    <!-- Table of products -->
+    <table class="details-table">
         <thead>
-        <tr style="border: 1px solid black;">
-            <th style="width: 5%;" class="text-center">#</th>
-            <th style="width: 40%;" class="text-left pl-2">Product</th>
-            <th style="width: 5%;" class="text-center">Quantity</th>
-            <th style="width: 20%;" class="text-right pr-2">Price</th>
-            <th style="width: 20%;" class="text-right pr-2">Total</th>
+        <tr>
+            <th class="text-center">#</th>
+            <th>Product</th>
+            <th class="text-center">Quantity</th>
+            <th class="text-right">Price</th>
+            <th class="text-right">Total</th>
         </tr>
         </thead>
         <tbody>
         {% for d in details %}
             <tr>
                 <td class="text-center">{{forloop.counter}}</td>
-                <td class="text-left pl-2">{{d.product.name}}</td>
+                <td>{{d.product.name}}</td>
                 <td class="text-center">{{d.quantity}}</td>
-                <td class="text-right pr-2 ">{{d.price}} Ksh</td>
-                <td class="text-right pr-2">{{d.total_detail}} Ksh</td>
+                <td class="text-right">{{d.price}} Ksh</td>
+                <td class="text-right">{{d.total_detail}} Ksh</td>
             </tr>
         {% endfor %}
         <tr>
-            <td colspan="4" class="text-right pr-2"><b>Subtotal</b></td>
-            <td class="text-right pr-2">{{sale.sub_total|floatformat:2}} Ksh</td>
+            <td colspan="4" class="text-right font-weight-bold">Subtotal</td>
+            <td class="text-right">{{sale.sub_total|floatformat:2}} Ksh</td>
         </tr>
         <tr>
-            <td colspan="4" class="text-right pr-2"><b>Tax Inclusive ({{sale.tax_percentage}}%)</b></td>
-            <td class="text-right pr-2">{{sale.tax_amount|floatformat:2}} Ksh</td>
+            <td colspan="4" class="text-right font-weight-bold">VAT ({{sale.tax_percentage}}%)</td>
+            <td class="text-right">{{sale.tax_amount|floatformat:2}} Ksh</td>
         </tr>
         <tr>
-            <td colspan="4" class="text-right pr-2"><b>Grand Total</b></td>
-            <td class="text-right pr-2">{{ sale.grand_total }} Ksh</td>
+            <td colspan="4" class="text-right font-weight-bold">Grand Total</td>
+            <td class="text-right">{{ sale.grand_total }} Ksh</td>
         </tr>
         <tr>
-            <td colspan="4" class="text-right pr-2"><b>Amount payed</b></td>
-            <td class="text-right pr-2">{{ sale.amount_payed }} Ksh</td>
+            <td colspan="4" class="text-right font-weight-bold">Amount Paid</td>
+            <td class="text-right">{{ sale.amount_payed }} Ksh</td>
         </tr>
         <tr>
-            <td colspan="4" class="text-right pr-2"><b>Change</b></td>
-            <td class="text-right pr-2">{{ sale.amount_change }} Ksh</td>
+            <td colspan="4" class="text-right font-weight-bold">Change</td>
+            <td class="text-right">{{ sale.amount_change }} Ksh</td>
         </tr>
         <tr>
-            <td colspan="5">
-                <p class="text-uppercase font-weight-bold text-center">
+            <td colspan="5" class="thanks-message">
+                <p class="font-weight-bold">
                     Thank you for your preference!
                 </p>
             </td>
