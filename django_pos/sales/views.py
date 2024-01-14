@@ -120,7 +120,7 @@ def SalesAddView(request):
                 messages.success(
                     request, 'There was an error during the creation!', extra_tags="danger")
 
-        return redirect('sales:sales_list')
+        return redirect('sales:sales_list', refresh='true')
 
     return render(request, "sales/sales_add.html", context=context)
 
