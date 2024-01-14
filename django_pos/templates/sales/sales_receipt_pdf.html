@@ -84,29 +84,29 @@
                 <td class="text-center">{{forloop.counter}}</td>
                 <td class="text-left pl-2">{{d.product.name}}</td>
                 <td class="text-center">{{d.quantity}}</td>
-                <td class="text-right pr-2 ">{{d.price}} $</td>
-                <td class="text-right pr-2">{{d.total_detail}} $</td>
+                <td class="text-right pr-2 ">{{d.price}} Ksh</td>
+                <td class="text-right pr-2">{{d.total_detail}} Ksh</td>
             </tr>
         {% endfor %}
         <tr>
             <td colspan="4" class="text-right pr-2"><b>Subtotal</b></td>
-            <td class="text-right pr-2">{{sale.sub_total|floatformat:2}} $</td>
+            <td class="text-right pr-2">{{sale.sub_total|floatformat:2}} Ksh</td>
         </tr>
         <tr>
             <td colspan="4" class="text-right pr-2"><b>VAT ({{sale.tax_percentage}}%)</b></td>
-            <td class="text-right pr-2">{{sale.tax_amount|floatformat:2}} $</td>
+            <td class="text-right pr-2">{{sale.tax_amount|floatformat:2}} Ksh</td>
         </tr>
         <tr>
             <td colspan="4" class="text-right pr-2"><b>Grand Total</b></td>
-            <td class="text-right pr-2">{{ sale.grand_total }} $</td>
+            <td class="text-right pr-2">{{ sale.grand_total }} Ksh</td>
         </tr>
         <tr>
             <td colspan="4" class="text-right pr-2"><b>Amount payed</b></td>
-            <td class="text-right pr-2">{{ sale.amount_payed }} $</td>
+            <td class="text-right pr-2">{{ sale.amount_payed }} Ksh</td>
         </tr>
         <tr>
             <td colspan="4" class="text-right pr-2"><b>Change</b></td>
-            <td class="text-right pr-2">{{ sale.amount_change }} $</td>
+            <td class="text-right pr-2">{{ sale.amount_change }} Ksh</td>
         </tr>
         <tr>
             <td colspan="5">
