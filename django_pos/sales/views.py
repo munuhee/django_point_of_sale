@@ -92,9 +92,9 @@ def SalesAddView(request):
                     product_instance = Product.objects.get(id=product_id)
 
                     if product_instance.quantity < quantity:
+                        new_sale.delete()
                         messages.error(
                             request, f'Insufficient quantity for product: {product_instance.name}', extra_tags="danger")
-                        new_sale.delete()
                         return redirect('sales:sales_list')
 
                     product_instance.quantity -= quantity
