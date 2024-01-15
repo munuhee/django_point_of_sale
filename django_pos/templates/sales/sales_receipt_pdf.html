@@ -114,6 +114,10 @@
             <div class="date"><b>Date:</b> {{sale.date_added}}</div>
             <div class="sale-id"><b>Sale ID:</b> {{sale.id}}</div>
             <div class="customer"><b>Customer:</b> {{sale.customer.get_full_name}}</div>
+            {% if sale.customer.first_name == 'Guest' %}
+            {% else %}
+            <div class="customer"><b>Loyalty points:</b> {{sale.customer.loyalty_points}}</div>
+            {% endif %}
         </div>
     </div>
 
