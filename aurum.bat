@@ -1,9 +1,6 @@
 @echo off
-:: Create virtual environment
-python -m venv venv
-
 :: Activate virtual environment
-call venv\Scripts\activate
+call .\venv\Scripts\activate
 
 :: Change directory to django_pos
 cd django_pos
