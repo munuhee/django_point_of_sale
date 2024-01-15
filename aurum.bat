@@ -1,22 +1,18 @@
 @echo off
-REM Ensure Docker is running
-docker --version >nul 2>&1
-if %errorlevel% neq 0 (
-    echo Docker is not installed or not running. Please install and start Docker.
-    pause
-    exit /b
-)
+:: Create virtual environment
+python -m venv venv
 
-REM Run Docker Compose
-docker-compose up -d
+:: Activate virtual environment
+call venv\Scripts\activate
 
-REM Open the browser to localhost:8000
-start "" "http://localhost:8000"
+:: Change directory to django_pos
+cd django_pos
 
-REM You can add a delay if needed
-timeout /t 5 >nul
+:: Run Django development server
+start python manage.py runserver
 
-REM Additional commands can be added here if needed
+:: Wait for a moment to ensure the server is up before opening the browser
+timeout /t 5 /nobreak >nul
 
-REM To stop the containers, you can use:
-REM docker-compose down
+:: Open browser
+start http://127.0.0.1:8000/

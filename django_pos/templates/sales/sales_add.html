@@ -39,7 +39,7 @@
                     <div class="col-md-9 pl-0">
                         <div class="card card-secondary">
                             <div class="card-header">Sale products</div>
-                            
+
                             <div class="card-body">
                                 <!--Search product-->
                                 <div class="form-group">
@@ -112,6 +112,18 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
+                                    <label>Wholesale Dicount (%)</label>
+                                    <div class="input-group">
+                                        <input name="discount_percentage" class="form-control" value=0 required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Discount Amount</label>
+                                    <div class="input-group">
+                                        <input name="discount_amount" class="form-control" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
                                     <label>Grand Total</label>
                                     <div class="input-group">
                                         <input name="grand_total" class="form-control" required>
@@ -169,12 +181,14 @@
     //Variable to store sale details and products
     var sale = {
         items: {
-            customer : 0, 
-            sub_total : 0.00, 
-            grand_total : 0.00, 
-            tax_amount : 0.00, 
-            tax_percentage : 0.00, 
-            amount_payed : 0.00, 
+            customer : 0,
+            sub_total : 0.00,
+            grand_total : 0.00,
+            tax_amount : 0.00,
+            tax_percentage : 0.00,
+            discount_amount : 0.00,
+            discount_percentage : 0.00,
+            amount_payed : 0.00,
             amount_change : 0.00,
             products: [
 
@@ -185,22 +199,25 @@
             var sub_total = 0.00
 
             var tax_percentage = $('input[name="tax_percentage"]').val();
+            var discount_percentage = $('input[name="discount_percentage"]').val();
 
             // Calculates the total for each product
             $.each(this.items.products, function(pos, dict){
-                dict.pos = pos;  
+                dict.pos = pos;
                 dict.total_product = roundTo(dict.quantity * dict.price, 2);
                 // Add the product total to the sale subtotal
                 sub_total += roundTo(dict.total_product, 2);
             });
 
-            //Update the sale subtotal, grand total, and tax amount
+            //Update the sale subtotal, grand total, discount amount and tax amount
             this.items.sub_total = roundTo(sub_total, 2);
             this.items.tax_amount = roundTo(this.items.sub_total * (tax_percentage / 100), 2);
-            this.items.grand_total = roundTo(this.items.sub_total + this.items.tax_amount, 2);
-    
+            this.items.discount_amount = roundTo(this.items.sub_total * (discount_percentage / 100), 2);
+            this.items.grand_total = roundTo(this.items.sub_total + this.items.tax_amount - this.items.discount_amount, 2);
+
             $('input[name="sub_total"]').val(this.items.sub_total);
             $('input[name="tax_amount"]').val(this.items.tax_amount);
+            $('input[name="discount_amount"]').val(this.items.discount_amount);
             $('input[name="grand_total"]').val(this.items.grand_total);
         },
         // Adds a product to the sale object
@@ -210,14 +227,14 @@
         },
         // Shows the selected product in the table
         list_product: function () {
-            // Calculate the sale 
+            // Calculate the sale
             this.calculate_sale();
 
             tblProducts = $("#table_products").DataTable({
                 destroy: true,
                 data: this.items.products,
                 columns: [
-                    {"data": "number"}, 
+                    {"data": "number"},
                     {"data": "name"},
                     {"data": "price"},
                     {"data": "quantity"},
@@ -228,10 +245,10 @@
                     {
                         // Quantity
                         class: 'text-center',
-                        targets: [3], 
+                        targets: [3],
                         render: function (data, type, row){
                             return '<input name="quantity" type="text" class="form-control form-control-xs text-center input-sm" autocomplete="off" value="'+row.quantity+'">';
-                        },                      
+                        },
                     },
                     {
                         //Product price an total
@@ -264,11 +281,11 @@
                     });
                 },
             })
-            
+
             // IDs de productos ya seleccionados para exlcuir en la busqueda
             //console.log("this.traer_ids()");
             //console.log(this.traer_ids());
-            
+
         },
     };
 
@@ -309,6 +326,47 @@
         });
 
 
+
+
+
+
+
+
+        //Discount percentage touchspin
+        $("input[name='discount_percentage']").TouchSpin({
+            min: 0,
+            max: 100,
+            step: 1,
+            decimals: 2,
+            boostat: 5,
+            maxboostedstep: 10,
+            postfix: '%'
+        }).on('change', function(){
+         // Update discount amount based on discount percentage
+            var discountPercentage = parseFloat($(this).val());
+            var subTotal = parseFloat($('input[name="sub_total"]').val());
+
+            var discountAmount = (discountPercentage / 100) * subTotal;
+            $('input[name="discount_amount"]').val(discountAmount.toFixed(2));
+
+            // Recalculate grand total
+            sale.calculate_sale();
+        });
+
+        // Discount amount input field
+        $("input[name='discount_amount']").on('change', function(){
+            // Update discount percentage based on discount amount
+            var discountAmount = parseFloat($(this).val());
+            var subTotal = parseFloat($('input[name="sub_total"]').val());
+
+            var discountPercentage = (discountAmount / subTotal) * 100;
+            $('input[name="discount_percentage"]').val(discountPercentage.toFixed(2));
+
+            // Recalculate grand total
+            sale.calculate_sale();
+        });
+
+
         //Select2 customers
         $('#searchbox_customers').select2({
             placeholder: "Select a customer",
@@ -318,7 +376,7 @@
         // Tables Events
         $('#table_products tbody').on('click', 'a[rel="delete"]', function () {
                 // When a product is deleted
-                
+
                 // Row variable of the table
                 var tr = tblProducts.cell($(this).closest('td, li')).index();
                 product_name = (tblProducts.row(tr.row).data().name)
@@ -340,7 +398,7 @@
                 }).then((result) => {
                     // Si se confirma
                     if (result.isConfirmed) {
-                        
+
                         // Delete the product
                         sale.items.products.splice(tr.row, 1);
                         //List the table again
@@ -422,7 +480,7 @@
             minimumInputLength: 1,
             allowClear: true,
             templateResult: template_product_searchbox,
-            ajax:{ 
+            ajax:{
                 url: "{% url 'products:get_products' %}",
                 type: 'POST',
                 data: function (params) {
@@ -449,14 +507,14 @@
                 //data.quantity = 1;
                 //Add the product to the sale object
                 sale.add_product(data);
-                console.log("Sale items");      
-                console.log(sale.items);      
+                console.log("Sale items");
+                console.log(sale.items);
                 //Clean the searchbox after the product is selected
-                $(this).val('').trigger('change.select2');; 
+                $(this).val('').trigger('change.select2');;
             });
-    
+
             // Products datatable
-            
+
             tblProducts = $('#table_products').DataTable({
                 columnDefs: [
                     {
@@ -465,7 +523,7 @@
                     }
                 ],
             });
-            
+
 
         });
 
@@ -474,7 +532,7 @@
             if (repo.loading) {
                 return repo.text;
             }
-        
+
             var option = $(
                 '<div class="wrapper container">'+
                 ' <div class="row">' +
@@ -487,13 +545,13 @@
                     '</div>' +
                   '</div>' +
                 '</div>');
-        
+
             return option;
         }
 
         // Send the sale via ajax
-        
-        $('.saleForm').on('submit', function (e) {  
+
+        $('.saleForm').on('submit', function (e) {
             // Only allow to send if we have at least one product
             if (sale.items.products.length === 0 ) {
                 Swal.fire({
@@ -503,11 +561,16 @@
                 });
                 return false;
             };
-            
+
+            // Ensure amount_payed and grand_total are numeric
+            var amountPayed = parseFloat($('input[name="amount_payed"]').val());
+            var grandTotal = parseFloat($('input[name="grand_total"]').val());
+
             // Only allow to send if the payed amount is equal or greater than the total
-            if ($('[name="amount_payed"]').val() < $('[name="grand_total"]').val()) {
+            // Only allow to send if the payed amount is equal or greater than the total
+            if (isNaN(amountPayed) || isNaN(grandTotal) || amountPayed < grandTotal) {
                 Swal.fire({
-                    title: 'Payable Amount is lower that the Grand Total',
+                    title: 'Payable Amount is lower than the Grand Total',
                     icon: 'warning',
                 });
                 return false;
@@ -516,12 +579,14 @@
             // We add the missing data to the sales object
             sale.items.customer = $('select[name="customer"]').val();
             console.log("Customer: " + sale.items.customer)
-            sale.items.sub_total = $('input[name="sub_total"]').val(); 
+            sale.items.sub_total = $('input[name="sub_total"]').val();
             sale.items.grand_total = $('input[name="grand_total"]').val();
-            sale.items.tax_amount = $('input[name="tax_amount"]').val(); 
+            sale.items.tax_amount = $('input[name="tax_amount"]').val();
             sale.items.tax_percentage = $('input[name="tax_percentage"]').val();
-            sale.items.amount_payed = $('input[name="amount_payed"]').val(); 
-            sale.items.amount_change = roundTo($('input[name="amount_payed"]').val() - $('input[name="grand_total"]').val(), 2); 
+            sale.items.discount_amount = $('input[name="discount_amount"]').val();
+            sale.items.discount_percentage = $('input[name="discount_percentage"]').val();
+            sale.items.amount_payed = $('input[name="amount_payed"]').val();
+            sale.items.amount_change = roundTo($('input[name="amount_payed"]').val() - $('input[name="grand_total"]').val(), 2);
 
             console.log("Sale:")
             console.log(sale.items)
@@ -544,7 +609,7 @@
                 url: "{% url 'sales:sales_add' %}",
                 type: "POST",
                 // We need to convert the JS object sale to string
-                data: JSON.stringify(sale.items), 
+                data: JSON.stringify(sale.items),
                 datatype: "json",
                 processData: false,
                 contentType: false,
@@ -561,8 +626,8 @@
                 console.log ("Ajax Fail");
                 alert(textStatus + ':' + errorThrown);
             });
-            
+
         });
-        
+
 </script>
 {% endblock javascripts %}

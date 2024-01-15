@@ -1,18 +1,29 @@
+import os
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
+from django.template.loader import get_template
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
+from django.core.exceptions import ObjectDoesNotExist
+from django.template.loader import get_template
 from django_pos.wsgi import *
 from django_pos import settings
-from django.template.loader import get_template
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.template.loader import render_to_string
 from django.db.models import Q
+
+from io import BytesIO
+from django.views import View
+from xhtml2pdf import pisa
+
 from customers.models import Customer
 from products.models import Product
-from weasyprint import HTML, CSS
 from .models import Sale, SaleDetail
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Paragraph
+from reportlab.lib.styles import getSampleStyleSheet
 import json
-
 
 def is_ajax(request):
     return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
@@ -57,7 +68,6 @@ def SalesListView(request):
     }
     return render(request, "sales/sales.html", context=context)
 
-
 @login_required(login_url="/accounts/login/")
 def SalesAddView(request):
     context = {
@@ -76,6 +86,8 @@ def SalesAddView(request):
                 "grand_total": float(data["grand_total"]),
                 "tax_amount": float(data["tax_amount"]),
                 "tax_percentage": float(data["tax_percentage"]),
+                "discount_amount": float(data["discount_amount"]),
+                "discount_percentage": float(data["discount_percentage"]),
                 "amount_payed": float(data["amount_payed"]),
                 "amount_change": float(data["amount_change"]),
             }
@@ -93,7 +105,7 @@ def SalesAddView(request):
 
                     if product_instance.quantity < quantity:
                         new_sale.delete()
-                        messages.error(
+                        messages.success(
                             request, f'Insufficient quantity for product: {product_instance.name}', extra_tags="danger")
                         return redirect('sales:sales_list')
 
@@ -111,6 +123,14 @@ def SalesAddView(request):
                         **detail_attributes)
                     sale_detail_new.save()
 
+                # Calculate loyalty points based on the grand total
+                loyalty_points = int(new_sale.grand_total // 10)  # You can adjust this formula as needed
+
+                # Update customer loyalty points
+                customer = new_sale.customer
+                customer.loyalty_points += loyalty_points
+                customer.save()
+
                 print("Sale saved")
 
                 messages.success(
@@ -119,11 +139,11 @@ def SalesAddView(request):
             except Exception as e:
                 messages.success(
                     request, 'There was an error during the creation!', extra_tags="danger")
+                return redirect('sales:sales_list')  # Redirect here instead of at the end
 
         return redirect('sales:sales_list')
 
     return render(request, "sales/sales_add.html", context=context)
-
 
 @login_required(login_url="/accounts/login/")
 def SalesDetailsView(request, sale_id):
@@ -132,7 +152,7 @@ def SalesDetailsView(request, sale_id):
         sale_id: ID of the sale to view
     """
     try:
-        # Get tthe sale
+        # Get the sale
         sale = Sale.objects.get(id=sale_id)
 
         # Get the sale details
@@ -150,31 +170,59 @@ def SalesDetailsView(request, sale_id):
         print(e)
         return redirect('sales:sales_list')
 
+def render_to_pdf(template_src, context_dict={}):
+    template = get_template(template_src)
+    html  = template.render(context_dict)
+    result = BytesIO()
+    pdf = pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), result)
+    if not pdf.err:
+        return HttpResponse(result.getvalue(), content_type='application/pdf')
+    return None
 
-@login_required(login_url="/accounts/login/")
-def ReceiptPDFView(request, sale_id):
-    """
-    Args:
-        sale_id: ID of the sale to view the receipt
-    """
-    # Get tthe sale
-    sale = Sale.objects.get(id=sale_id)
+data = {
+    "company": "Dennnis Ivanov Company",
+    "address": "123 Street name",
+    "city": "Vancouver",
+    "state": "WA",
+    "zipcode": "98663",
 
-    # Get the sale details
-    details = SaleDetail.objects.filter(sale=sale)
 
-    template = get_template("sales/sales_receipt_pdf.html")
-    context = {
-        "sale": sale,
-        "details": details
-    }
-    html_template = template.render(context)
+    "phone": "555-555-2345",
+    "email": "youremail@dennisivy.com",
+    "website": "dennisivy.com",
+	}
 
-    # CSS Boostrap
-    css_url = os.path.join(
-        settings.BASE_DIR, 'static/css/receipt_pdf/bootstrap.min.css')
+#Opens up page as PDF
+class ReceiptPDFView(View):
+    def get(self, request, *args, **kwargs):
+        sale_id = kwargs.get('sale_id')
+        try:
+            # Get the sale
+            sale = Sale.objects.get(id=sale_id)
 
-    # Create the pdf
-    pdf = HTML(string=html_template).write_pdf(stylesheets=[CSS(css_url)])
+            # Get the sale details
+            details = SaleDetail.objects.filter(sale=sale)
 
-    return HttpResponse(pdf, content_type="application/pdf")
+            # Define the dynamic data for the PDF template
+            context = {
+                "sale": sale,
+                "details": details
+            }
+
+            # Render the PDF using the dynamic data
+            template = get_template('sales/sales_receipt_pdf.html')
+            html = template.render(context)
+
+            # CSS Boostrap
+            css_url = os.path.join(
+                settings.BASE_DIR, 'static/css/receipt_pdf/bootstrap.min.css')
+
+            result = BytesIO()
+            pdf = pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), result)
+
+            if not pdf.err:
+                return HttpResponse(result.getvalue(), content_type='application/pdf')
+        except Sale.DoesNotExist:
+            pass  # Handle the case where the sale with the given ID doesn't exist
+
+        return HttpResponse("Error generating PDF", status=500)

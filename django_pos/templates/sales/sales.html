@@ -24,27 +24,11 @@
             </button>
         </a>
     </div>
-    <!-- Display "No results found" if there are no sales -->
-    {% if sales|length == 0 %}
-        <div class="alert alert-warning" role="alert">
-            No results found.
-        </div>
-    {% endif %}
-    <!-- Add a search form above the table -->
-    <div class="row mb-3">
-        <form method="get" class="form-inline">
-            <div class="form-group">
-                <label for="search" class="sr-only">Search</label>
-                <input type="text" class="form-control" id="search" name="search" placeholder="Search" value="{{ search_query }}">
-            </div>
-            <button type="submit" class="btn btn-primary ml-2">Search</button>
-        </form>
-    </div>
 
     <!-- DataTable -->
     <div class="card shadow mb-12">
         <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Customers</h6>
+            <h6 class="m-0 font-weight-bold text-primary">Sales record</h6>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -88,38 +72,6 @@
                     </tbody>
                 </table>
             </div>
-            <!-- Add pagination links at the bottom of the table -->
-            <div class="row">
-                <div class="col-md-12">
-                    <nav aria-label="Page navigation example">
-                        <ul class="pagination justify-content-end">
-                            {% if sales.has_previous %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?page=1" tabindex="-1">First</a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="?page={{ sales.previous_page_number }}">Previous</a>
-                                </li>
-                            {% endif %}
-
-                            {% for i in sales.paginator.page_range %}
-                                <li class="page-item{% if i == sales.number %} active{% endif %}">
-                                    <a class="page-link" href="?page={{ i }}">{{ i }}</a>
-                                </li>
-                            {% endfor %}
-
-                            {% if sales.has_next %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?page={{ sales.next_page_number }}">Next</a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="?page={{ sales.paginator.num_pages }}">Last</a>
-                                </li>
-                            {% endif %}
-                        </ul>
-                    </nav>
-                </div>
-            </div>
         </div>
     </div>
 {% endblock content %}
@@ -144,8 +96,8 @@
 <!--Datatables-->
 <script>
     // Call the dataTables jQuery plugin
-    Ksh(document).ready(function() {
-        tblCategories = Ksh('#dataTable').DataTable({
+    $(document).ready(function() {
+        tblCategories = $('#dataTable').DataTable({
             dom: 'Bfrtip', // Buttons are draw at this element
             buttons: [
                 {
@@ -155,7 +107,7 @@
                 className: 'btn btn-info',
                 exportOptions: {
                     columns: [ 0, 1, 2, 3 ,4, 5]
-                }            
+                }
                 },
                 {
                     extend: 'excelHtml5',
@@ -164,7 +116,7 @@
                     className: 'btn btn-success ml-2',
                     exportOptions: {
                         columns: [ 0, 1, 2, 3 ,4, 5 ]
-                    } 
+                    }
                 },
                 {
                     extend: 'pdfHtml5',
