@@ -2,6 +2,9 @@
 :: Activate virtual environment
 call .\venv\Scripts\activate
 
+:: Load environment variables from .env
+dotenv .env
+
 :: Change directory to django_pos
 cd django_pos
 
