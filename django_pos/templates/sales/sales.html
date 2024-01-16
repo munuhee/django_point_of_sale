@@ -18,7 +18,7 @@
     <!--Create new sale-->
     <div class="row ml-0 mb-3">
         <a href="{% url 'sales:sales_add' %}">
-            <button type="button" class="btn btn-success font-weight-bold">
+            <button type="button" onclick="performHardReload()" class="btn btn-success font-weight-bold">
                     <i class="fas fa-plus mr-2"></i>
                     Create new sale
             </button>
@@ -95,6 +95,10 @@
 
 <!--Datatables-->
 <script>
+    function performHardReload() {
+        // Perform a hard reload
+        location.reload(true);
+    }
     // Call the dataTables jQuery plugin
     $(document).ready(function() {
         tblCategories = $('#dataTable').DataTable({
