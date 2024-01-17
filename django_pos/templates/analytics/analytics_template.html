@@ -1,0 +1,139 @@
+{% extends "pos/base.html" %}
+
+{% block title %}Analytics{% endblock title %}
+
+{% block stylesheets %}
+    <!-- Date range picker CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker@3.1.0/daterangepicker.css">
+    <style>
+        /* Additional custom styles can be added here */
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+            margin-top: 50px;
+        }
+    </style>
+{% endblock stylesheets %}
+
+{% block heading %}Analytics{% endblock heading %}
+
+{% block content %}
+    <div class="container mb-4">
+        <form id="analytics-form" class="form-inline">
+            {% csrf_token %}
+
+            <div class="form-group mr-2">
+                <label for="date-range" class="mr-2">Select Date Range:</label>
+                <select id="date-range" class="form-control" name="date_range">
+                    <option value="today">Today</option>
+                    <option value="last_week">Last Week</option>
+                    <option value="last_30_days">Last 30 days</option>
+                    <option value="custom">Custom Period</option>
+                </select>
+            </div>
+
+            <div class="form-group mr-2" id="custom-date-range" style="display: none;">
+                <label for="start-date" class="mr-2">Start Date:</label>
+                <input type="text" id="start-date" name="start_date" class="form-control"/>
+
+                <label for="end-date" class="mr-2">End Date:</label>
+                <input type="text" id="end-date" name="end_date" class="form-control"/>
+            </div>
+
+            <button type="submit" class="btn btn-primary"><i class="fas fa-calculator"></i> Calculate Total</button>
+        </form>
+        <div class="row mt-4">
+            <div id="result-container" class="col-md-6 shadow mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <!-- Display the total sales result here -->
+                        <h5 class="card-title">Total Sales</h5>
+                        <p class="card-text">Your total sales result content goes here.</p>
+                    </div>
+                </div>
+            </div>
+            <div id="top-selling" class="col-md-6 shadow mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <!-- Display the top selling result here -->
+                        <h5 class="card-title">Top Selling</h5>
+                        <p class="card-text">Your top-selling result content goes here.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block javascripts %}
+<!-- Modify the Date range picker initialization -->
+<script>
+    $(document).ready(function () {
+        // Initialize date range picker for start and end date inputs
+        $('#start-date').daterangepicker({
+            singleDatePicker: true,
+            showDropdowns: true,
+            autoUpdateInput: true,  // Automatically update the input field
+            locale: {
+                format: 'YYYY-MM-DD'
+            }
+        });
+
+        $('#end-date').daterangepicker({
+            singleDatePicker: true,
+            showDropdowns: true,
+            autoUpdateInput: true,  // Automatically update the input field
+            locale: {
+                format: 'YYYY-MM-DD'
+            }
+        });
+
+        // Handle form submission using AJAX
+        $('#analytics-form').submit(function (event) {
+            event.preventDefault();
+
+            // Collect form data
+            var formData = {
+                'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val(),
+                'date_range': $('#date-range').val(),
+                'start_date': $('#start-date').val(),
+                'end_date': $('#end-date').val()
+            };
+            console.log('Form data:', formData);
+
+            // Make AJAX request
+            $.ajax({
+                type: 'POST',
+                url: '{% url "analytics:analytics_view" %}',
+                data: formData,
+                success: function (data) {
+                    console.log('Received data:', data);
+                    $('#result-container').html('<strong>Total Sales: </strong> ' + 'Ksh. ' + data.total_sales);
+
+                    // Display the top-selling products
+                    var topProductsHtml = '<strong>Top Selling Products:</strong><ul>';
+                    for (var i = 0; i < data.top_selling_products.length; i++) {
+                        topProductsHtml += '<li>' + data.top_selling_products[i].product__name + ' - Quantity: ' + data.top_selling_products[i].total_quantity + '</li>';
+                    }
+                    topProductsHtml += '</ul>';
+                    $('#top-selling').html(topProductsHtml);
+                },
+                error: function (xhr, errmsg, err) {
+                    console.log(xhr.status + ": " + xhr.responseText);
+                }
+            });
+        });
+
+        // Toggle custom date range based on user selection
+        $('#date-range').change(function () {
+            $('#custom-date-range').toggle($(this).val() === 'custom');
+        });
+    });
+</script>
+{% endblock javascripts %}

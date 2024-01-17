@@ -1,0 +1,25 @@
+<!-- tax_update.html -->
+{% extends "pos/base.html" %}
+{% load static %}
+<!-- Page title  -->
+{% block title %}Tax{% endblock title %}
+
+<!-- Page Heading -->
+{% block heading %}Tax{% endblock heading %}
+
+<!-- Page content  -->
+{% block content %}
+<div class="container mt-5">
+  <p class="lead">{{ tax }}</p>
+  <form method="post" action="">
+    {% csrf_token %}
+    <!-- Use Bootstrap form-group for each form element -->
+    <div class="form-group">
+      {{ form.label_tag }}
+      {{ form }}
+    </div>
+    <!-- Add Bootstrap classes to the button for styling -->
+    <button type="submit" class="btn btn-primary">Save</button>
+  </form>
+</div>
+{% endblock %}

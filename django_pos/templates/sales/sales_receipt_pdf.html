@@ -56,7 +56,12 @@
         }
 
         .sale-info {
-            text-align: right;
+            text-align: center;
+        }
+
+        .vat-analysis {
+            text-align: center;
+            font-size: 12px;
         }
 
         .date, .sale-id, .customer {
@@ -138,18 +143,19 @@
                 <td>{{forloop.counter}}</td>
                 <td>{{d.product.name}}</td>
                 <td>{{d.quantity}}</td>
-                <td>{{d.price}} Ksh</td>
-                <td>{{d.total_detail}} Ksh</td>
+                <td>{{d.price|floatformat:2}} Ksh</td>
+                <td>{{d.total_detail|floatformat:2}} Ksh</td>
             </tr>
         {% endfor %}
+        {% if sale.grand_total == sale.sub_total %}
+        <tr>
+            <td colspan="4" class="totals">Total</td>
+            <td>{{sale.sub_total|floatformat:2}} Ksh</td>
+        </tr>
+        {% else %}
         <tr>
             <td colspan="4" class="totals">Subtotal</td>
             <td>{{sale.sub_total|floatformat:2}} Ksh</td>
-        </tr>
-        {% if sale.tax_percentage != 0 %}
-        <tr>
-            <td colspan="4" class="totals">VAT ({{sale.tax_percentage}}%)</td>
-            <td>{{sale.tax_amount|floatformat:2}} Ksh</td>
         </tr>
         {% endif %}
         {% if sale.discount_percentage != 0 %}
@@ -158,23 +164,54 @@
             <td>{{sale.discount_amount|floatformat:2}} Ksh</td>
         </tr>
         {% endif %}
+        {% if sale.grand_total != sale.sub_total %}
         <tr>
             <td colspan="4" class="totals">Grand Total</td>
-            <td>{{ sale.grand_total }} Ksh</td>
+            <td>{{ sale.grand_tota|floatformat:2l }} Ksh</td>
         </tr>
+        {% endif %}
         <tr>
             <td colspan="4" class="totals">Amount paid</td>
-            <td>{{ sale.amount_payed }} Ksh</td>
+            <td>{{ sale.amount_payed|floatformat:2 }} Ksh</td>
         </tr>
         <tr>
-            <td colspan="4" class="totals">Change</td>
-            <td>{{ sale.amount_change }} Ksh</td>
+            <td colspan="4" class="totals">Change Due</td>
+            <td>{{ sale.amount_change|floatformat:2 }} Ksh</td>
         </tr>
         </tbody>
     </table>
 
+    <div class="col">
+        <div class="sale-info">
+            <div><b>Served By:</b> Steve</div>
+        </div>
+    </div>
+
+    <!-- VAT Analysis Table -->
+    <table>
+        <strong class="vat-analysis">VAT Analysis</strong>
+        <thead>
+        <tr>
+            <th>Rate</th>
+            <th>Exclusive</th>
+            <th>Tax</th>
+            <th>Price</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Replace placeholders with actual values from your data -->
+        <tr>
+            <td>VAT</td>
+            <td>{{ exclusive|floatformat:2 }}</td>
+            <td>{{ tax|floatformat:2 }}</td>
+            <td>{{ sale.grand_total|floatformat:2 }}</td>
+        </tr>
+        <!-- Add more rows if needed for additional VAT analysis -->
+        </tbody>
+    </table>
+
     <div class="footer">
-        <p class="thank-you">Thank you for your preference!</p>
+        <p class="thank-you">Goods once sold are not returnable.<br>Thank you for your preference!</p>
     </div>
 </div>
 </body>

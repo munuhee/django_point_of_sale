@@ -100,19 +100,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label>Tax Inclusive (%)</label>
-                                    <div class="input-group">
-                                        <input name="tax_percentage" class="form-control" value=0 required>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label>Tax Amount</label>
-                                    <div class="input-group">
-                                        <input name="tax_amount" class="form-control" required>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label>Wholesale Dicount (%)</label>
+                                    <label>Dicount (%)</label>
                                     <div class="input-group">
                                         <input name="discount_percentage" class="form-control" value=0 required>
                                     </div>
@@ -184,8 +172,6 @@
             customer : 0,
             sub_total : 0.00,
             grand_total : 0.00,
-            tax_amount : 0.00,
-            tax_percentage : 0.00,
             discount_amount : 0.00,
             discount_percentage : 0.00,
             amount_payed : 0.00,
@@ -198,7 +184,6 @@
             // Subtotal of all products added
             var sub_total = 0.00
 
-            var tax_percentage = $('input[name="tax_percentage"]').val();
             var discount_percentage = $('input[name="discount_percentage"]').val();
 
             // Calculates the total for each product
@@ -209,14 +194,12 @@
                 sub_total += roundTo(dict.total_product, 2);
             });
 
-            //Update the sale subtotal, grand total, discount amount and tax amount
+            //Update the sale subtotal, grand total, discount and amount
             this.items.sub_total = roundTo(sub_total, 2);
-            this.items.tax_amount = roundTo(this.items.sub_total * (tax_percentage / 100), 2);
             this.items.discount_amount = roundTo(this.items.sub_total * (discount_percentage / 100), 2);
-            this.items.grand_total = roundTo(this.items.sub_total + this.items.tax_amount - this.items.discount_amount, 2);
+            this.items.grand_total = roundTo(this.items.sub_total - this.items.discount_amount, 2);
 
             $('input[name="sub_total"]').val(this.items.sub_total);
-            $('input[name="tax_amount"]').val(this.items.tax_amount);
             $('input[name="discount_amount"]').val(this.items.discount_amount);
             $('input[name="grand_total"]').val(this.items.grand_total);
         },
@@ -290,48 +273,6 @@
     };
 
     $(document).ready(function() {
-
-        //Tax percentage touchspin
-        $("input[name='tax_percentage']").TouchSpin({
-            min: 0,
-            max: 100,
-            step: 1,
-            decimals: 2,
-            boostat: 5,
-            maxboostedstep: 10,
-            postfix: '%'
-        }).on('change', function(){
-         // Update tax amount based on tax percentage
-            var taxPercentage = parseFloat($(this).val());
-            var subTotal = parseFloat($('input[name="sub_total"]').val());
-
-            var taxAmount = (taxPercentage / 100) * subTotal;
-            $('input[name="tax_amount"]').val(taxAmount.toFixed(2));
-
-            // Recalculate grand total
-            sale.calculate_sale();
-        });
-
-        // Tax amount input field
-        $("input[name='tax_amount']").on('change', function(){
-            // Update tax percentage based on tax amount
-            var taxAmount = parseFloat($(this).val());
-            var subTotal = parseFloat($('input[name="sub_total"]').val());
-
-            var taxPercentage = (taxAmount / subTotal) * 100;
-            $('input[name="tax_percentage"]').val(taxPercentage.toFixed(2));
-
-            // Recalculate grand total
-            sale.calculate_sale();
-        });
-
-
-
-
-
-
-
-
         //Discount percentage touchspin
         $("input[name='discount_percentage']").TouchSpin({
             min: 0,
@@ -581,8 +522,6 @@
             console.log("Customer: " + sale.items.customer)
             sale.items.sub_total = $('input[name="sub_total"]').val();
             sale.items.grand_total = $('input[name="grand_total"]').val();
-            sale.items.tax_amount = $('input[name="tax_amount"]').val();
-            sale.items.tax_percentage = $('input[name="tax_percentage"]').val();
             sale.items.discount_amount = $('input[name="discount_amount"]').val();
             sale.items.discount_percentage = $('input[name="discount_percentage"]').val();
             sale.items.amount_payed = $('input[name="amount_payed"]').val();

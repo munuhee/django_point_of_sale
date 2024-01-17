@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.http import HttpResponse
 from django.template.loader import get_template
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
 from django.template.loader import get_template
 from django_pos.wsgi import *
@@ -18,7 +18,8 @@ from xhtml2pdf import pisa
 
 from customers.models import Customer
 from products.models import Product
-from .models import Sale, SaleDetail
+from .models import Sale, SaleDetail, Tax
+from .forms import TaxForm
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Paragraph
@@ -42,8 +43,6 @@ def SalesListView(request):
         Q(customer__last_name__icontains=search_query) |
         Q(sub_total__icontains=search_query) |
         Q(grand_total__icontains=search_query) |
-        Q(tax_amount__icontains=search_query) |
-        Q(tax_percentage__icontains=search_query) |
         Q(amount_payed__icontains=search_query) |
         Q(amount_change__icontains=search_query)
     ).order_by('-date_added')
@@ -84,8 +83,6 @@ def SalesAddView(request):
                 "customer": Customer.objects.get(id=int(data['customer'])),
                 "sub_total": float(data["sub_total"]),
                 "grand_total": float(data["grand_total"]),
-                "tax_amount": float(data["tax_amount"]),
-                "tax_percentage": float(data["tax_percentage"]),
                 "discount_amount": float(data["discount_amount"]),
                 "discount_percentage": float(data["discount_percentage"]),
                 "amount_payed": float(data["amount_payed"]),
@@ -203,8 +200,15 @@ class ReceiptPDFView(View):
             # Get the sale details
             details = SaleDetail.objects.filter(sale=sale)
 
+            # VAT analysis
+            vat_rate = float(Tax.objects.get(id=1).percentage)
+            exclusive = float(sale.grand_total * ((100 - vat_rate) / 100))
+            tax = float(sale.grand_total * (vat_rate/100))
+
             # Define the dynamic data for the PDF template
             context = {
+                "exclusive": exclusive,
+                "tax": tax,
                 "sale": sale,
                 "details": details
             }
@@ -226,3 +230,21 @@ class ReceiptPDFView(View):
             pass  # Handle the case where the sale with the given ID doesn't exist
 
         return HttpResponse("Error generating PDF", status=500)
+
+@login_required(login_url="/accounts/login/")
+def display_and_edit_tax(request):
+    tax = get_object_or_404(Tax, pk=1)
+
+    if request.method == 'POST':
+        form = TaxForm(request.POST, instance=tax)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Tax information updated successfully.',  extra_tags="success")
+            return redirect('sales:display_and_edit_tax')
+        else:
+            messages.error(request, 'Error updating tax information. Please check the form.',  extra_tags="danger")
+
+    else:
+        form = TaxForm(instance=tax)
+
+    return render(request, 'sales/tax.html', {'tax': tax, 'form': form})

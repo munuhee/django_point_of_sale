@@ -1,8 +1,22 @@
 from django.db import models
 import django.utils.timezone
+from django.db.models import Sum
 from customers.models import Customer
 from products.models import Product
 
+class SaleManager(models.Manager):
+    def get_total_sales_in_date_range(self, start_date, end_date):
+        return self.filter(date_added__range=[start_date, end_date]).aggregate(sum_total=Sum('grand_total'))['sum_total'] or 0
+
+    def get_top_selling_products(self, start_date, end_date, num_products=3):
+        # Get the top-selling products within the date range
+        top_products = SaleDetail.objects.filter(
+            sale__date_added__range=[start_date, end_date]
+        ).values('product__id', 'product__name').annotate(
+            total_quantity=Sum('quantity')
+        ).order_by('-total_quantity')[:num_products]
+
+        return top_products
 
 class Sale(models.Model):
     date_added = models.DateTimeField(default=django.utils.timezone.now)
@@ -10,8 +24,6 @@ class Sale(models.Model):
         Customer, models.DO_NOTHING, db_column='customer')
     sub_total = models.FloatField(default=0)
     grand_total = models.FloatField(default=0)
-    tax_amount = models.FloatField(default=0)
-    tax_percentage = models.FloatField(default=0)
     discount_amount = models.FloatField(default=0)
     discount_percentage = models.FloatField(default=0)
     amount_payed = models.FloatField(default=0)
@@ -26,6 +38,8 @@ class Sale(models.Model):
     def sum_items(self):
         details = SaleDetail.objects.filter(sale=self.id)
         return sum([d.quantity for d in details])
+
+    objects = SaleManager()
 
 
 class SaleDetail(models.Model):
@@ -42,3 +56,9 @@ class SaleDetail(models.Model):
 
     def __str__(self) -> str:
         return "Detail ID: " + str(self.id) + " Sale ID: " + str(self.sale.id) + " Quantity: " + str(self.quantity)
+
+class Tax(models.Model):
+    percentage = models.DecimalField(max_digits=5, decimal_places=2, unique=True)
+
+    def __str__(self):
+        return f'Tax: {self.percentage}%'

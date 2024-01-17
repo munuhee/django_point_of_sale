@@ -12,5 +12,7 @@ urlpatterns = [
     path('details/<str:sale_id>',
          views.SalesDetailsView, name='sales_details'),
     # Sale receipt PDF
-   path('pdf_view/<int:sale_id>/', views.ReceiptPDFView.as_view(), name="sales_receipt_pdf"),
+    path('pdf_view/<int:sale_id>/', views.ReceiptPDFView.as_view(), name="sales_receipt_pdf"),
+    # Tax
+    path('edit-tax/', views.display_and_edit_tax, name='display_and_edit_tax'),
 ]
