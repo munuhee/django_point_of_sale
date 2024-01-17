@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.http import HttpResponse
 from django.template.loader import get_template
 from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
 from django.template.loader import get_template
@@ -190,6 +191,7 @@ data = {
 	}
 
 #Opens up page as PDF
+@method_decorator(login_required, name='dispatch')
 class ReceiptPDFView(View):
     def get(self, request, *args, **kwargs):
         sale_id = kwargs.get('sale_id')
@@ -199,6 +201,9 @@ class ReceiptPDFView(View):
 
             # Get the sale details
             details = SaleDetail.objects.filter(sale=sale)
+
+            # Get the logged-in username
+            served_by = request.user.username
 
             # VAT analysis
             vat_rate = float(Tax.objects.get(id=1).percentage)
@@ -210,7 +215,8 @@ class ReceiptPDFView(View):
                 "exclusive": exclusive,
                 "tax": tax,
                 "sale": sale,
-                "details": details
+                "details": details,
+                "served_by": served_by,
             }
 
             # Render the PDF using the dynamic data
