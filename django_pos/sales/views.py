@@ -12,6 +12,7 @@ from django_pos import settings
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.template.loader import render_to_string
 from django.db.models import Q
+from django.db import models
 
 from io import BytesIO
 from django.views import View
@@ -177,19 +178,6 @@ def render_to_pdf(template_src, context_dict={}):
         return HttpResponse(result.getvalue(), content_type='application/pdf')
     return None
 
-data = {
-    "company": "Dennnis Ivanov Company",
-    "address": "123 Street name",
-    "city": "Vancouver",
-    "state": "WA",
-    "zipcode": "98663",
-
-
-    "phone": "555-555-2345",
-    "email": "youremail@dennisivy.com",
-    "website": "dennisivy.com",
-	}
-
 #Opens up page as PDF
 @method_decorator(login_required, name='dispatch')
 class ReceiptPDFView(View):
@@ -202,21 +190,45 @@ class ReceiptPDFView(View):
             # Get the sale details
             details = SaleDetail.objects.filter(sale=sale)
 
+            # Get the sale details with vat_rate=general and vat_rate=ZERO
+            general_details = SaleDetail.objects.filter(sale=sale, product__vat_rate='GENERAL')
+            zero_details = SaleDetail.objects.filter(sale=sale, product__vat_rate='ZERO')
+
+            # Calculate the grand total for general_details
+            general_grand_total = general_details.aggregate(sum_total=models.Sum('total_detail'))['sum_total'] or 0
+
+            # Calculate the grand total for zero_details
+            zero_grand_total = zero_details.aggregate(sum_total=models.Sum('total_detail'))['sum_total'] or 0
+
+
             # Get the logged-in username
             served_by = request.user.username
 
             # VAT analysis
-            vat_rate = float(Tax.objects.get(id=1).percentage)
-            exclusive = float(sale.grand_total * ((100 - vat_rate) / 100))
-            tax = float(sale.grand_total * (vat_rate/100))
+            general_vat_rate = float(Tax.objects.get(slug='tax').percentage)
+            general_vatable_amt = float(general_grand_total * ((100 - general_vat_rate) / 100))
+            general_vat_amt = float(general_grand_total * (general_vat_rate/100))
+
+            zero_vat_rate = float(0)
+            zero_vatable_amt = float(zero_grand_total)
+            zero_vat_amt = float(0)
+
+            tax_instance = Tax.objects.get(slug='tax')
 
             # Define the dynamic data for the PDF template
             context = {
-                "exclusive": exclusive,
-                "tax": tax,
+                "general_vat_rate":general_vat_rate,
+                "zero_vat_rate":zero_vat_rate,
+                "general_vatable_amt":general_vatable_amt,
+                "general_vat_amt":general_vat_amt,
+                "zero_vatable_amt":zero_vatable_amt,
+                "zero_vat_amt":zero_vat_amt,
                 "sale": sale,
+                "general_details": general_details,
+                "zero_details":zero_details,
                 "details": details,
                 "served_by": served_by,
+                "tax_instance":tax_instance,
             }
 
             # Render the PDF using the dynamic data
@@ -239,7 +251,8 @@ class ReceiptPDFView(View):
 
 @login_required(login_url="/accounts/login/")
 def display_and_edit_tax(request):
-    tax = get_object_or_404(Tax, pk=1)
+    tax = get_object_or_404(Tax, slug='tax')
+    tax_instance = Tax.objects.get(slug='tax')
 
     if request.method == 'POST':
         form = TaxForm(request.POST, instance=tax)
@@ -253,4 +266,4 @@ def display_and_edit_tax(request):
     else:
         form = TaxForm(instance=tax)
 
-    return render(request, 'sales/tax.html', {'tax': tax, 'form': form})
+    return render(request, 'sales/tax.html', {'tax': tax, 'tax_instance':tax_instance, 'form': form})

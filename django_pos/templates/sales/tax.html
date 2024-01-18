@@ -2,21 +2,58 @@
 {% extends "pos/base.html" %}
 {% load static %}
 <!-- Page title  -->
-{% block title %}Tax{% endblock title %}
+{% block title %}VAT{% endblock title %}
 
 <!-- Page Heading -->
 {% block heading %}Tax{% endblock heading %}
 
+{% block stylesheets %}
+<style>
+  /* tax_form_styles.css */
+  /* Style the form group container */
+  .form-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center; /* Align items vertically center */
+  }
+
+  /* Style the form inputs */
+  form input[type="text"],
+  form input[type="number"],
+  form select {
+    flex: 1;
+    padding: 8px;
+    margin: 5px;
+    box-sizing: border-box;
+    border-radius: 6px;
+  }
+
+  /* Style the form labels */
+  form label {
+    margin-bottom: 5px;
+    display: inline-block;
+  }
+
+  /* Style the submit button */
+  form button {
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+  }
+
+</style>
+{% endblock stylesheets %}
 <!-- Page content  -->
 {% block content %}
 <div class="container mt-5">
   <p class="lead">{{ tax }}</p>
+  <p class="lead">status: {{ tax_instance.status|lower }}</p>
   <form method="post" action="">
     {% csrf_token %}
-    <!-- Use Bootstrap form-group for each form element -->
     <div class="form-group">
-      {{ form.label_tag }}
-      {{ form }}
+        {{ form }}
     </div>
     <!-- Add Bootstrap classes to the button for styling -->
     <button type="submit" class="btn btn-primary">Save</button>

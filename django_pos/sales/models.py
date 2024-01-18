@@ -1,6 +1,9 @@
 from django.db import models
 import django.utils.timezone
 from django.db.models import Sum
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
+from django.utils.text import slugify
 from customers.models import Customer
 from products.models import Product
 
@@ -58,7 +61,23 @@ class SaleDetail(models.Model):
         return "Detail ID: " + str(self.id) + " Sale ID: " + str(self.sale.id) + " Quantity: " + str(self.quantity)
 
 class Tax(models.Model):
+    VAT_STATUS = (  # new
+        ("ACTIVE", "Active"),
+        ("INACTIVE", "Inactive")
+    )
     percentage = models.DecimalField(max_digits=5, decimal_places=2, unique=True)
+    slug = models.SlugField(unique=True, editable=True)
+    status = models.CharField(
+        choices=VAT_STATUS,
+        max_length=100,
+        default="INACTIVE",
+        verbose_name="VAT status",
+    )
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(f'tax-{self.id}')
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f'Tax: {self.percentage}%'

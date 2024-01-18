@@ -30,6 +30,11 @@ class Product(models.Model):
         ("ACTIVE", "Active"),
         ("INACTIVE", "Inactive")
     )
+    VAT_CHOICES = (
+        ("GENERAL", "General"),
+        ("ZERO", "Zero")
+    )
+
 
     name = models.CharField(max_length=256)
     description = models.TextField(max_length=256)
@@ -47,6 +52,12 @@ class Product(models.Model):
     )
     price = models.FloatField(default=0)
     quantity = models.IntegerField(default=0)
+    vat_rate = models.CharField(
+        choices=VAT_CHOICES,
+        default="GENERAL",
+        max_length=100,
+        verbose_name="VAT rates",
+    )
 
     class Meta:
         # Table's name
@@ -64,6 +75,7 @@ class Product(models.Model):
             'category': self.category.name if self.category else None,
             'price': self.price,
             'quantity': self.quantity,
+            'vat_rate': self.vat_rate,
             'total_product': self.quantity * self.price,
         }
         return item

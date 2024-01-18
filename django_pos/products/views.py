@@ -175,6 +175,7 @@ def ProductsAddView(request):
     context = {
         "active_icon": "products_categories",
         "product_status": Product.status.field.choices,
+        "vat_rates": Product.vat_rate.field.choices,
         "categories": Category.objects.all().filter(status="ACTIVE")
     }
 
@@ -188,7 +189,8 @@ def ProductsAddView(request):
             "description": data['description'],
             "category": Category.objects.get(id=data['category']),
             "price": data['price'],
-            "quantity": data['quantity']
+            "quantity": data['quantity'],
+            "vat_rate": data['vat_rate'],
         }
 
         # Check if a product with the same attributes exists
@@ -236,6 +238,7 @@ def ProductsUpdateView(request, product_id):
     context = {
         "active_icon": "products",
         "product_status": Product.status.field.choices,
+        "vat_rates": Product.VAT_CHOICES,
         "product": product,
         "categories": Category.objects.all()
     }
@@ -251,7 +254,8 @@ def ProductsUpdateView(request, product_id):
                 "description": data['description'],
                 "category": Category.objects.get(id=data['category']),
                 "price": data['price'],
-                "quantity": data['quantity']
+                "quantity": data['quantity'],
+                "vat_rate": data['vat_rate']
             }
 
             # Check if a product with the same attributes exists

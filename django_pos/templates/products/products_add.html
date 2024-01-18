@@ -58,7 +58,7 @@
                 </div>
 
                 <div class="form-row">
-                    <div class="form-group col-md-8">
+                    <div class="form-group col-md-4">
                         <label for="inputPrice">Price</label>
                         <input type="number" name="price" step="any" class="form-control" placeholder="Enter price" required>
                     </div>
@@ -66,8 +66,15 @@
                         <label for="inputQuantity">Quantity</label>
                         <input type="number" name="quantity" class="form-control" placeholder="Enter quantity" required>
                     </div>
+                    <div class="form-group col-md-4">
+                        <label for="vat_rate">VAT Rate</label>
+                        <select name="vat_rate" class="form-control" required>
+                            {% for vat_rate in vat_rates %}
+                            <option value="{{vat_rate.0}}">{{vat_rate.1}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
-
 
                 <button type="submit" class="btn btn-success font-weight-bold">Create product</button>
 
