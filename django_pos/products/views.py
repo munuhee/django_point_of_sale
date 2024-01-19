@@ -150,7 +150,7 @@ def ProductsListView(request):
         )
 
     # Pagination
-    paginator = Paginator(products_list, 10)
+    paginator = Paginator(products_list, 15)
     # Get the current page number from the request, defaulting to 1
     page = request.GET.get('page', 1)
 

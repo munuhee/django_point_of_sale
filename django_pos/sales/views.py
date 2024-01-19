@@ -34,7 +34,7 @@ def is_ajax(request):
 @login_required(login_url="/accounts/login/")
 def SalesListView(request):
     # Specify the number of items per page
-    items_per_page = 10  # You can adjust this as needed
+    items_per_page = 15  # You can adjust this as needed
 
     # Get the search query from the GET parameters
     search_query = request.GET.get('search', '')
