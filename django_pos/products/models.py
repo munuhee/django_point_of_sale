@@ -51,6 +51,7 @@ class Product(models.Model):
         blank=True,
     )
     price = models.FloatField(default=0)
+    buying_price = models.FloatField(default=0)
     quantity = models.IntegerField(default=0)
     vat_rate = models.CharField(
         choices=VAT_CHOICES,
@@ -66,6 +67,9 @@ class Product(models.Model):
     def __str__(self) -> str:
         return self.name
 
+    def calculate_profit(self):
+        return self.quantity * (self.price - self.buying_price)
+
     def to_json(self):
         item = {
             'id': self.id,
@@ -74,8 +78,10 @@ class Product(models.Model):
             'status': self.status,
             'category': self.category.name if self.category else None,
             'price': self.price,
+            'buying_price': self.buying_price,
             'quantity': self.quantity,
             'vat_rate': self.vat_rate,
             'total_product': self.quantity * self.price,
+            'profit': self.calculate_profit(),
         }
         return item

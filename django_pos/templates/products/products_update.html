@@ -66,15 +66,19 @@
                 </div>
 
                 <div class="form-row">
-                    <div class="form-group col-md-4">
-                        <label for="inputPrice">Price</label>
+                    <div class="form-group col-md-3">
+                        <label for="inputPrice">Buying Price</label>
+                        <input type="number" name="buying_price" step="any" class="form-control" value="{{product.buying_price}}" required>
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label for="inputPrice">Selling Price</label>
                         <input type="number" name="price" step="any" class="form-control" value="{{product.price}}" required>
                     </div>
-                    <div class="form-group col-md-4">
+                    <div class="form-group col-md-3">
                         <label for="inputQuantity">Quantity</label>
                         <input type="number" name="quantity" class="form-control" value="{{product.quantity}}" required>
                     </div>
-                    <div class="form-group col-md-4">
+                    <div class="form-group col-md-3">
                         <label for="vat_rate">VAT Rate</label>
                         <select name="vat_rate" class="form-control" required>
                             {% for vat_rate in vat_rates %}
@@ -83,7 +87,6 @@
                         </select>
                     </div>
                 </div>
-
 
                 <button type="submit" class="btn btn-success font-weight-bold">Update product</button>
 

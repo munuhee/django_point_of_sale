@@ -46,7 +46,7 @@
                 <input type="text" id="end-date" name="end_date" class="form-control"/>
             </div>
 
-            <button type="submit" class="btn btn-primary"><i class="fas fa-calculator"></i> Calculate Total</button>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-calculator"></i> Calculate</button>
         </form>
         <div class="row mt-4">
             <div id="result-container" class="col-md-6 shadow mb-4">
@@ -114,7 +114,10 @@
                 data: formData,
                 success: function (data) {
                     console.log('Received data:', data);
-                    $('#result-container').html('<strong>Total Sales: </strong> ' + 'Ksh. ' + data.total_sales);
+                    $('#result-container').html(
+                        '<strong>Total Sales: </strong> ' + 'Ksh. ' + data.total_sales +
+                        '<br><strong>Total Profit: </strong> ' + 'Ksh. ' + data.total_profit
+                        );
 
                     // Display the top-selling products
                     var topProductsHtml = '<strong>Top Selling Products:</strong><ul>';

@@ -189,6 +189,7 @@ def ProductsAddView(request):
             "description": data['description'],
             "category": Category.objects.get(id=data['category']),
             "price": data['price'],
+            "buying_price": data['buying_price'],
             "quantity": data['quantity'],
             "vat_rate": data['vat_rate'],
         }
@@ -254,6 +255,7 @@ def ProductsUpdateView(request, product_id):
                 "description": data['description'],
                 "category": Category.objects.get(id=data['category']),
                 "price": data['price'],
+                "buying_price": data['buying_price'],
                 "quantity": data['quantity'],
                 "vat_rate": data['vat_rate']
             }

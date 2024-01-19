@@ -1,9 +1,8 @@
 from django.db import models
+from django.db.models import Sum, F, ExpressionWrapper, fields
 import django.utils.timezone
-from django.db.models import Sum
-from django.db.models.signals import post_delete
 from django.dispatch import receiver
-from django.utils.text import slugify
+from django.db.models.signals import post_save
 from customers.models import Customer
 from products.models import Product
 
@@ -11,8 +10,15 @@ class SaleManager(models.Manager):
     def get_total_sales_in_date_range(self, start_date, end_date):
         return self.filter(date_added__range=[start_date, end_date]).aggregate(sum_total=Sum('grand_total'))['sum_total'] or 0
 
+    def get_total_profit_in_date_range(self, start_date, end_date):
+        total_profit = self.filter(
+            date_added__range=[start_date, end_date]
+        ).aggregate(
+            sum_total_profit=Sum('sale_profit')
+        )['sum_total_profit'] or 0
+        return total_profit
+
     def get_top_selling_products(self, start_date, end_date, num_products=3):
-        # Get the top-selling products within the date range
         top_products = SaleDetail.objects.filter(
             sale__date_added__range=[start_date, end_date]
         ).values('product__id', 'product__name').annotate(
@@ -31,6 +37,7 @@ class Sale(models.Model):
     discount_percentage = models.FloatField(default=0)
     amount_payed = models.FloatField(default=0)
     amount_change = models.FloatField(default=0)
+    sale_profit = models.FloatField(default=0)
 
     class Meta:
         db_table = 'Sales'
@@ -44,10 +51,23 @@ class Sale(models.Model):
 
     objects = SaleManager()
 
+    def calculate_sale_profit(self):
+        details = SaleDetail.objects.filter(sale=self)
+        profit = sum([
+            (detail.price - detail.product.buying_price) * detail.quantity
+            if detail.price is not None and detail.product.buying_price is not None
+            else 0
+            for detail in details
+        ])
+        return profit
+
+    def save(self, *args, **kwargs):
+        self.sale_profit = self.calculate_sale_profit()
+        super().save(*args, **kwargs)
 
 class SaleDetail(models.Model):
     sale = models.ForeignKey(
-        Sale, models.DO_NOTHING, db_column='sale')
+        Sale, models.DO_NOTHING, db_column='sale', related_name='saledetail_set')
     product = models.ForeignKey(
         Product, models.DO_NOTHING, db_column='product')
     price = models.FloatField()
@@ -60,8 +80,9 @@ class SaleDetail(models.Model):
     def __str__(self) -> str:
         return "Detail ID: " + str(self.id) + " Sale ID: " + str(self.sale.id) + " Quantity: " + str(self.quantity)
 
+
 class Tax(models.Model):
-    VAT_STATUS = (  # new
+    VAT_STATUS = (
         ("ACTIVE", "Active"),
         ("INACTIVE", "Inactive")
     )
@@ -81,3 +102,9 @@ class Tax(models.Model):
 
     def __str__(self):
         return f'Tax: {self.percentage}%'
+
+
+@receiver(post_save, sender=SaleDetail)
+def update_sale_profit(sender, instance, **kwargs):
+    instance.sale.sale_profit = instance.sale.calculate_sale_profit()
+    instance.sale.save()

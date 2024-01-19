@@ -1,22 +1,22 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.utils import timezone
-from django.db.models import Sum
+from django.db.models import Sum, F, ExpressionWrapper, fields
 from django.utils.dateparse import parse_datetime
-from sales.models import Sale
+from sales.models import Sale, SaleDetail
 
 def analytics_view(request):
     """
     View function for handling analytics requests.
 
     This function retrieves the date range from the POST request and calculates
-    the total sales for the specified period. The result is returned as a JSON response.
+    the total sales and profit for the specified period. The result is returned as a JSON response.
 
     Parameters:
     - request (HttpRequest): The HTTP request object.
 
     Returns:
-    - JsonResponse: A JSON response containing the total sales for the specified date range.
+    - JsonResponse: A JSON response containing the total sales and profit for the specified date range.
     - HttpResponse: The rendered analytics template if the request method is not POST.
     """
     if request.method == 'POST':
@@ -46,8 +46,14 @@ def analytics_view(request):
 
         query = {'date_added__range': [start_date, end_date]}
         print(Sale.objects.filter(**query).query)  # Check the generated query
+
+        # Calculate total sales
         total_sales = Sale.objects.filter(**query).aggregate(sum_total=Sum('grand_total'))['sum_total'] or 0
         total_sales = round(total_sales, 2)
+
+        # Calculate total profit
+        total_profit = Sale.objects.filter(**query).aggregate(sum_total_profit=Sum('sale_profit'))['sum_total_profit'] or 0
+        total_profit = round(total_profit, 2)
 
         # Get the top 3 selling products
         top_selling_products = Sale.objects.get_top_selling_products(start_date, end_date, num_products=3)
@@ -55,6 +61,7 @@ def analytics_view(request):
         # Prepare the response data
         response_data = {
             'total_sales': total_sales,
+            'total_profit': total_profit,
             'top_selling_products': list(top_selling_products),
         }
 
