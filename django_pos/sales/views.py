@@ -13,6 +13,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.template.loader import render_to_string
 from django.db.models import Q
 from django.db import models
+from django.http import JsonResponse
 
 from io import BytesIO
 from django.views import View
@@ -102,11 +103,11 @@ def SalesAddView(request):
                     quantity = int(product["quantity"])
                     product_instance = Product.objects.get(id=product_id)
 
+                     # Check if the quantity is valid
                     if product_instance.quantity < quantity:
+                        # Return a JSON response with an error message
                         new_sale.delete()
-                        messages.success(
-                            request, f'Insufficient quantity for product: {product_instance.name}', extra_tags="danger")
-                        return redirect('sales:sales_list')
+                        return JsonResponse({'error': 'Insufficient quantity available for ' + product_instance.name})
 
                     product_instance.quantity -= quantity
                     product_instance.save()
@@ -138,7 +139,7 @@ def SalesAddView(request):
             except Exception as e:
                 messages.success(
                     request, 'There was an error during the creation!', extra_tags="danger")
-                return redirect('sales:sales_list')  # Redirect here instead of at the end
+                return redirect('sales:sales_list')
 
         return redirect('sales:sales_list')
 

@@ -82,7 +82,11 @@
                         <label for="vat_rate">VAT Rate</label>
                         <select name="vat_rate" class="form-control" required>
                             {% for vat_rate in vat_rates %}
-                            <option value="{{vat_rate.0}}">{{vat_rate.1}}</option>
+                                {% if vat_rate.0 == product.vat_rate %}
+                                    <option value="{{vat_rate.0}}" selected>{{vat_rate.1}}</option>
+                                {% else %}
+                                    <option value="{{vat_rate.0}}">{{vat_rate.1}}</option>
+                                {% endif %}
                             {% endfor %}
                         </select>
                     </div>

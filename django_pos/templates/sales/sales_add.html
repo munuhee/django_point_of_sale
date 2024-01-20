@@ -554,6 +554,17 @@
                 contentType: false,
                 success: function (data) {
                     console.log("Ajax OK")
+                    if (data.error) {
+                        // Show a SweetAlert error message
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: data.error,
+                        });
+                    } else {
+                        // If the sale was successful, redirect to sales:sales_list
+                        window.location.href = "{% url 'sales:sales_list' %}";
+                    }
                 },
                 error: function (error) {
                     console.log("Ajax error");
@@ -566,6 +577,8 @@
                 alert(textStatus + ':' + errorThrown);
             });
 
+            // Prevent the form from submitting
+            return false;
         });
 
 </script>

@@ -67,7 +67,7 @@ class Sale(models.Model):
 
 class SaleDetail(models.Model):
     sale = models.ForeignKey(
-        Sale, models.DO_NOTHING, db_column='sale', related_name='saledetail_set')
+        Sale, models.CASCADE, db_column='sale', related_name='saledetail_set')
     product = models.ForeignKey(
         Product, models.DO_NOTHING, db_column='product')
     price = models.FloatField()
