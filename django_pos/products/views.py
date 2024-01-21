@@ -272,7 +272,7 @@ def ProductsUpdateView(request, product_id):
 
             product = Product.objects.get(id=product_id)
 
-            messages.success(request, '¡Product: ' + product.name +
+            messages.success(request, '!Product: ' + product.name +
                              ' updated successfully!', extra_tags="success")
             return redirect('products:products_list')
         except Exception as e:
