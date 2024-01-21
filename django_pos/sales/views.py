@@ -125,7 +125,7 @@ def SalesAddView(request):
                     sale_detail_new.save()
 
                 # Calculate loyalty points based on the grand total
-                loyalty_points = int(new_sale.grand_total // 10)  # You can adjust this formula as needed
+                loyalty_points = int(new_sale.grand_total // 100)  # You can adjust this formula as needed
 
                 # Update customer loyalty points
                 customer = new_sale.customer
