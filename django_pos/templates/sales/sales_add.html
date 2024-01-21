@@ -562,8 +562,10 @@
                             text: data.error,
                         });
                     } else {
-                        // If the sale was successful, redirect to sales:sales_list
-                        window.location.href = "{% url 'sales:sales_list' %}";
+                        // If the sale was successful, construct the sale details URL dynamically
+                        var saleDetailsUrl = "{% url 'sales:sales_details' sale_id=123 %}".replace('123', data.sale_id);
+                        // Redirect to the dynamically constructed URL
+                        window.location.href = saleDetailsUrl;
                     }
                 },
                 error: function (error) {

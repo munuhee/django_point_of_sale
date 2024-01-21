@@ -19,8 +19,9 @@
 
 <!-- Page content  -->
 {% block content %}
+
 <!--Go back-->
-<div class="row ml-0 mb-3">
+<div class="row ml-0 mb-3 d-inline-block">
     <a href="{% url 'sales:sales_list' %}">
         <button type="button" class="btn btn-info font-weight-bold">
             <i class="fas fa-long-arrow-alt-left mr-2"></i>
@@ -28,6 +29,16 @@
         </button>
     </a>
 </div>
+
+<!-- Print Receipt button -->
+<div class="row ml-3 mb-3 d-inline-block">
+    <a href="{% url 'sales:sales_receipt_pdf' sale_id=sale.id %}" class="text-decoration-none">
+        <button class="btn btn-primary" onclick="printReceipt()">
+            <i class="fas fa-print"></i> Print Receipt
+        </button>
+    </a>
+</div>
+
 
 <!--Sale products and details-->
 <form action="{% url 'sales:sales_add' %}" class="saleForm" method="post">
@@ -39,7 +50,7 @@
                     <div class="col-md-9 pl-0">
                         <div class="card card-secondary">
                             <div class="card-header">Sale products</div>
-                            
+
                             <div class="card-body">
                                 <!--Products table-->
                                 <div class="card-body table-responsive p-0">
@@ -141,11 +152,11 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.6.15/dist/sweetalert2.all.min.js"></script>
 
 <script>
-    
+
 // Products datatable
 
 tblProducts = $('#table_products').DataTable({
 });
-                    
+
 </script>
 {% endblock javascripts %}

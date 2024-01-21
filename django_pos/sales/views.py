@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from django.template.loader import get_template
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
+from django.urls import reverse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
 from django.template.loader import get_template
@@ -135,13 +136,16 @@ def SalesAddView(request):
 
                 messages.success(
                     request, 'Sale created succesfully!', extra_tags="success")
+                # Return the sale ID in the JSON response
+                return JsonResponse({'sale_id': new_sale.id})
+
+                # Redirect to the sales details page for the newly created sale
+                return redirect(reverse('sales:sales_details', kwargs={'sale_id': new_sale.id}))
 
             except Exception as e:
                 messages.success(
                     request, 'There was an error during the creation!', extra_tags="danger")
                 return redirect('sales:sales_list')
-
-        return redirect('sales:sales_list')
 
     return render(request, "sales/sales_add.html", context=context)
 
