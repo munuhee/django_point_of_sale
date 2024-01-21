@@ -32,6 +32,16 @@
             <h6 class="m-0 font-weight-bold text-primary">Categories</h6>
         </div>
         <div class="card-body">
+            <!-- search form -->
+            <form class="form-inline" method="get" action="{% url 'products:categories_list' %}">
+                <div class="input-group">
+                    <input type="text" class="form-control" name="q" value="{{ search_query }}" placeholder="Search category">
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary" type="submit">Search</button>
+                    </div>
+                </div>
+            </form>
+
             <div class="table-responsive">
                 <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
                     <thead>
@@ -74,7 +84,7 @@
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </a>
-                                    
+
                                 <!-- Modal -->
                                 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                                     <div class="modal-dialog">
@@ -102,6 +112,24 @@
                         {% endfor %}
                     </tbody>
                 </table>
+                <!-- pagination links -->
+                <div class="pagination">
+                    <span class="step-links">
+                        {% if categories.has_previous %}
+                            <a href="?page=1">&laquo; first</a>
+                            <a href="?page={{ categories.previous_page_number }}">previous</a>
+                        {% endif %}
+
+                        <span class="current">
+                            Page {{ categories.number }} of {{ categories.paginator.num_pages }}.
+                        </span>
+
+                        {% if categories.has_next %}
+                            <a href="?page={{ categories.next_page_number }}">next</a>
+                            <a href="?page={{ categories.paginator.num_pages }}">last &raquo;</a>
+                        {% endif %}
+                    </span>
+                </div>
             </div>
         </div>
     </div>
@@ -138,7 +166,7 @@
                 className: 'btn btn-info',
                 exportOptions: {
                     columns: [ 0, 1, 2, 3 ,4 ]
-                }            
+                }
                 },
                 {
                     extend: 'excelHtml5',
@@ -147,7 +175,7 @@
                     className: 'btn btn-success ml-2',
                     exportOptions: {
                         columns: [ 0, 1, 2, 3 ,4 ]
-                    } 
+                    }
                 },
                 {
                     extend: 'pdfHtml5',

@@ -32,6 +32,17 @@
             <h6 class="m-0 font-weight-bold text-primary">Products</h6>
         </div>
         <div class="card-body">
+            <!-- Search form -->
+            <div class="container">
+                <form method="GET" action="{% url 'products:products_list' %}" class="mb-4">
+                    <div class="input-group">
+                        <input type="text" name="search" value="{{ search_query }}" class="form-control" placeholder="Search">
+                        <div class="input-group-append">
+                            <button type="submit" class="btn btn-outline-success">Search</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
             <!-- Display "No results found" if there are no sales -->
             <div class="table-responsive">
                 <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">

@@ -9,10 +9,34 @@ from .models import Category, Product
 
 @login_required(login_url="/accounts/login/")
 def CategoriesListView(request):
+    # Get the search query parameter from the request
+    search_query = request.GET.get('q', '')
+
+    # Filter categories based on search query
+    categories = Category.objects.filter(
+        Q(name__icontains=search_query) |
+        Q(description__icontains=search_query)
+        # Add more fields as needed
+    )
+
+    # Pagination
+    paginator = Paginator(categories, 15)
+    page = request.GET.get('page')
+
+    try:
+        categories = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver the first page.
+        categories = paginator.page(1)
+    except EmptyPage:
+        categories = paginator.page(paginator.num_pages)
+
     context = {
         "active_icon": "products_categories",
-        "categories": Category.objects.all()
+        "categories": categories,
+        "search_query": search_query,
     }
+
     return render(request, "products/categories.html", context=context)
 
 
