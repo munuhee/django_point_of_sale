@@ -1,10 +1,10 @@
 {% extends "pos/base.html" %}
-
+{% load static %}
 {% block title %}Analytics{% endblock title %}
 
 {% block stylesheets %}
     <!-- Date range picker CSS -->
-    <link rel="stylesheet" href="{% static 'daterangepicker.css' %}">
+    <link rel="stylesheet" href="{% static 'date/daterangepicker.css' %}">
     <style>
         /* Additional custom styles can be added here */
         body {
