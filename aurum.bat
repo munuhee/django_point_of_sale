@@ -12,7 +12,7 @@ cd django_pos
 start python manage.py runserver
 
 :: Wait for a moment to ensure the server is up before opening the browser
-timeout /t 10 /nobreak >nul
+timeout /t 30 /nobreak >nul
 
 :: Open browser
 start http://127.0.0.1:8000/
